@@ -1,4 +1,24 @@
-import { UserLayout ,BlankLayout} from '@/components/layouts'
+import { UserLayout ,BlankLayout,TabLayout} from '@/components/layouts'
+
+
+
+/**
+ * 走菜单，走权限控制
+ * @type {[null,null]}
+ */
+ export const asyncRouterMap = [
+
+  {
+    path: '/',
+    name: 'dashboard',
+    component: TabLayout,
+    meta: { title: '首页' },
+    redirect: '/dashboard/analysis',
+    children: [
+    ]
+  }
+]
+
 /*
 **
 * 基础路由
@@ -70,10 +90,17 @@ export const constantRouterMap = [
       }
     ]
   },
-  {
-    path: '/404',
-    component: () => import(/* webpackChunkName: "fail" */ '@/views/exception/404')
-  },
- 
+  // {
+  //   path: '/404',
+  //   component: () => import(/* webpackChunkName: "fail" */ '@/views/exception/404')
+  // },
+  // {
+  //   path: '/403',
+  //   component: () => import(/* webpackChunkName: "fail" */ '@/views/exception/403')
+  // },
+  // {
+  //   path: '/500',
+  //   component: () => import(/* webpackChunkName: "fail" */ '@/views/exception/500')
+  // }
  ]
  

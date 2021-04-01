@@ -14,9 +14,25 @@ module.exports = {
   // 如果你不需要生产环境的 source map，可以将其设置为 false 以加速生产环境构建。
   productionSourceMap: false,
   //打包app时放开该配置
-  //publicPath:'./',
+  chainWebpack: (config) => {
+    config.resolve.alias
+      .set('@$', resolve('src'))
+      .set('@api', resolve('src/api'))
+      .set('@assets', resolve('src/assets'))
+      .set('@comp', resolve('src/components'))
+      .set('@views', resolve('src/views'))
+  },
+  // publicPath:'./',
+  configureWebpack: config => {
+    //生产环境取消 console.log
+    if (process.env.NODE_ENV === 'production') {
+      config.optimization.minimizer[0].options.terserOptions.compress.drop_console = true
+    }
 
-
+    if (process.env.NODE_ENV === 'dev') {
+      config.devtool = 'source-map'
+    }
+  },
   css: {
     loaderOptions: {
       less: {
@@ -31,7 +47,23 @@ module.exports = {
     }
   },
 
-
-
+  devServer: {
+    port: 3000,
+    proxy: {
+     /* '/api': {
+        target: 'https://mock.ihx.me/mock/5baf3052f7da7e07e04a5116/antd-pro', //mock API接口系统
+        ws: false,
+        changeOrigin: true,
+        pathRewrite: {
+          '/jeecg-boot': ''  //默认所有请求都加了jeecg-boot前缀，需要去掉
+        }
+      },*/
+      '/yoo-boot': {
+        target: 'http://localhost:8088', //请求本地 需要jeecg-boot后台项目
+        ws: false,
+        changeOrigin: true
+      },
+    }
+  },
   lintOnSave: undefined
 }

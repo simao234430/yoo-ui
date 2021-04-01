@@ -80,13 +80,15 @@
 
 <script>
 import {getAction } from '@/api/manage'
-
+import { mapActions } from "vuex"
+import { timeFix } from "@/utils/util"
 export default {
   components: {},
   data() {
     return {
       currdatetime:'',
       inputCodeContent:"",
+      randCodeImage:'',
       inputCodeNull:true,
       requestCodeSuccess:false,
       form: this.$form.createForm(this),
@@ -104,6 +106,56 @@ export default {
   computed: {},
   watch: {},
   methods: {
+      ...mapActions(['Login']),
+      requestFailed (err) {
+        this.$notification[ 'error' ]({
+          message: '登录失败',
+          description: ((err.response || {}).data || {}).message || err.message || "请求出现错误，请稍后再试",
+          duration: 4,
+        });
+        this.loginBtn = false;
+      },
+      loginSuccess () {
+        this.$router.push({ path: "/dashboard/analysis" }).catch(()=>{
+          console.log('登录跳转首页出错,这个错误从哪里来的')
+        })
+        this.$notification.success({
+          message: '欢迎',
+          description: `${timeFix()}，欢迎回来`,
+        });
+      },
+      handleSubmit () {
+        let that = this
+        let loginParams = {};
+        that.loginBtn = true;
+        // 使用账户密码登录
+        if (that.customActiveKey === 'tab1') {
+          that.form.validateFields([ 'username', 'password','inputCode', 'rememberMe' ], { force: true }, (err, values) => {
+            if (!err) {
+              loginParams.username = values.username
+              // update-begin- --- author:scott ------ date:20190805 ---- for:密码加密逻辑暂时注释掉，有点问题
+              //loginParams.password = md5(values.password)
+              //loginParams.password = encryption(values.password,that.encryptedString.key,that.encryptedString.iv)
+              loginParams.password = values.password
+              loginParams.remember_me = values.rememberMe
+              // update-begin- --- author:scott ------ date:20190805 ---- for:密码加密逻辑暂时注释掉，有点问题
+              loginParams.captcha = that.inputCodeContent
+              loginParams.checkKey = that.currdatetime
+              console.log("登录参数",loginParams)
+              that.Login(loginParams).then((res) => {
+                console.log(res)
+                this.loginSuccess()
+              }).catch((err) => {
+                that.requestFailed(err);
+              });
+
+
+            }else {
+              that.loginBtn = false;
+            }
+          })
+        }
+      },
       handleChangeCheckCode(){
         this.currdatetime = new Date().getTime();
         getAction(`/sys/randomImage/${this.currdatetime}`).then(res=>{
